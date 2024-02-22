@@ -14,5 +14,7 @@
 #define MAX_ORDER 50
 
 int main(){
-
+    int waiter_ID;
+    printf("Enter Waiter ID: ");
+    scanf("%d",&waiter_ID);
 }
