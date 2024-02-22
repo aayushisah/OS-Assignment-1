@@ -39,7 +39,6 @@ int main()
         // shared memory segment
         int tableId = getpid() % MAX_TABLE;
         key_t tablekey; // key to identify shared memory segment
-
         // Generate a key for the shared memory segment
         if ((tablekey = ftok("table.c", tableId)) == -1)
         {
@@ -47,32 +46,45 @@ int main()
             return 1;
         }
 
-        int shmid = shmget(tablekey, sizeof(orders), IPC_CREAT | 0666); // read and write both permission given
-        int(*shared_orders)[MAX_ORDER] = shmat(shmid, NULL, 0);
-        // Copy orders data to shared memory
-        for (int i = 0; i < numberOfCustomer; i++)
+        int shmid = shmget(tablekey, sizeof(int) * (MAX_ORDER + 1), IPC_CREAT | 0666); // read and write both permission given
+        if (shmid == -1)
         {
-            for (int j = 0; j < MAX_ORDER; j++)
+            perror("Error in shmget in creating/ accessing shared memory\n");
+            return 1;
+        }
+
+        int(*shared_orders)[MAX_ORDER + 1] = shmat(shmid, NULL, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
+        if (shared_orders == (void *)-1)
+        {
+            perror("Error in shmPtr in attaching the memory segment\n");
+            return 1;
+        }
+        // Copy orders data to shared memory
+        // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
+        shared_orders[0][0] = 0;
+        for (int i = 1; i < numberOfCustomer + 1; i++)
+        {
+            for (int j = 1; j < MAX_ORDER + 1; j++)
             {
                 shared_orders[i][j] = orders[i][j];
             }
         }
 
         // Wait for waiter to check order validity
-        while (*shared_orders == 0)
+        while (shared_orders[0][0] == 0)
         {
             sleep(1);
         }
-
-        while (*shared_orders == 1)
+        // shared_orders[0][0]=-1 means invalid
+        while (shared_orders[0][0] == -1)
         {
             // Order is invalid, prompt customers to give orders again
             printf("Invalid order detected. Please give orders again.\n");
             orders = ordersArr(numberOfCustomer);
             // Copy orders data to shared memory
-            for (int i = 0; i < numberOfCustomer; i++)
+            for (int i = 1; i < numberOfCustomer + 1; i++)
             {
-                for (int j = 0; j < MAX_ORDER; j++)
+                for (int j = 1; j < MAX_ORDER + 1; j++)
                 {
                     shared_orders[i][j] = orders[i][j];
                 }
@@ -80,7 +92,7 @@ int main()
         }
         // asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
-        scanf(% d, &ShouldWeContinue);
+        scanf("%d", &ShouldWeContinue);
     } while (ShouldWeContinue != -1);
 }
 
