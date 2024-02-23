@@ -50,7 +50,7 @@ int main()
 					{
 						break;
 					}
-					if (*shared_orders[i][j] < 1 || *shared_orders[i][j] > 4)
+					if (*shared_orders[i][j] < 0 || *shared_orders[i][j] > 4)
 					{
 						*shared_orders[0][0] = -1;
 						break;
@@ -60,6 +60,7 @@ int main()
 					;
 				break;
 			}
+			*shared_orders[0][0] = 2;	//returning 2 if order is valid.
 		}
 
 		// code to check total bill amount and creating new shared memory to send total bill to manager
