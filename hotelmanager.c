@@ -53,7 +53,7 @@ int main()
     }
     
     double total_wages = 0.4*earnings_total;
-    double total_profit = earnings_total - wages;
+    double total_profit = earnings_total - total_wages;
     
     fprintf(fptr,"Total Earnings of Hotel: %.2f INR\n", earnings_total);
     fprintf(fptr,"Total Wages of Waiters: %.2f INR\n", total_wages);
