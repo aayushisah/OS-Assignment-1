@@ -57,40 +57,42 @@ int main(){
 
     //code to check total bill amount and creating new shared memory to send total bill to manager
 	// wait for valid order if invalid? How?
-	int total_bill = 0;
-	int prices[4] = {30, 40, 25, 30};
+	if(shared_orders[0][0] == 0){
+		int total_bill = 0; 
+		int prices[4] = {30, 40, 25, 30};
 	
-	for(int i = 1; i < numberOfCustomer + 1; i++)
-	{
-		for(int j = 1; j < MAX_ORDER + 1; j++)
+		for(int i = 1; i < numberOfCustomer + 1; i++)
 		{
-			total_bill += prices[shared_orders[i][j]-1]; 
-		}	
-	}
+			for(int j = 1; j < MAX_ORDER + 1; j++)
+			{
+				total_bill += prices[shared_orders[i][j]-1]; 
+			}	
+		}
 	
-	printf("Bill Amount for Table X: %d INR", total_bill);
+		printf("Bill Amount for Table X: %d INR", total_bill);
 
-	// Creating a shared-memory between Manager-Waiter
+		// Creating a shared-memory between Manager-Waiter
 		
-    key_t billkey;
-    if((billkey = ftok("waiter.c", waiterID)) == -1){
+	  key_t billkey;
+	  if((billkey = ftok("waiter.c", waiterID)) == -1){
         perror("Error in ftok\n");
         return 1;
     }
     int shmid_bills = shmget(billkey, sizeof(int) * 10, IPC_CREAT | 0666); //do we change MAX_ORDER to sizeof(order)?
-	if(shmid_bills==-1){
-		perror("Error in creating/accessing shared memory\n");
-		return 1;
-	} 	
+		if(shmid_bills==-1){
+			perror("Error in creating/accessing shared memory\n");
+			return 1;
+		} 	
 
-	int (*table_bills)[10] = shmat(shmid_bills, NULL, 0);  
+		int (*table_bills)[10] = shmat(shmid_bills, NULL, 0);  
 
-	// Sending Bill Amount to Manager
+		// Sending Bill Amount to Manager
 	
-	table_bills[WAITER_ID] = total_bill;
+		table_bills[WAITER_ID] = total_bill;
+	}	
 
-	// Termination
+		// Termination
 	
-
+		shouldWeContinue = shared_orders[0][2];			//updating shouldWeContinue flag
     }while(ShouldWeContinue != -1)
 }
