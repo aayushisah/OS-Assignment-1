@@ -41,6 +41,7 @@ int main()
         perror("Error in shmget in creating/ accessing shared memory\n");
         return 1;
     }
+
     int(*shared_orders)[MAX_CUSTOMERS + 1][MAX_ORDER + 1];
     shared_orders = shmat(shmid, 0, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
     if (shared_orders == (void *)-1)
@@ -62,7 +63,6 @@ int main()
         // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
         shared_orders[0][0] = 0;
         shared_orders[0][1] = numberOfCustomer; // aditya added, delete if causing trouble.
-        shared_orders[0][2] = shouldWeContinue; // joy added to pass shouldWeContinue flag in shm
         for (int i = 1; i < numberOfCustomer + 1; i++)
         {
             for (int j = 1; j < MAX_ORDER + 1; j++)
@@ -98,7 +98,7 @@ int main()
         // asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
         scanf("%d", &ShouldWeContinue);
-
+        shared_orders[0][2] = shouldWeContinue; // joy added to pass shouldWeContinue flag in shm
     } while (ShouldWeContinue != -1);
     shmdt(shared_orders);
 }
