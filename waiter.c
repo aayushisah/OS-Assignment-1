@@ -13,6 +13,8 @@
 #define MENU "menu.txt"
 #define MAX_ORDER 50
 
+
+//test definiton
 int main()
 {
 	int waiterID;
@@ -35,7 +37,7 @@ int main()
 			return 1;
 		}
 
-		int(*shared_orders)[MAX_CUSTOMERS + 1][MAX_ORDER + 1] = shmat(shmid, NULL, 0); // attached to shared memory
+		int(*shared_orders)[MAX_ORDER + 1] = shmat(shmid, NULL, 0); // attached to shared memory
 		int numberOfCustomer = shared_orders[0][1];
 
 		// code to check if order serial numbers exist
@@ -103,6 +105,6 @@ int main()
 
 		// Termination
 
-		shouldWeContinue = shared_orders[0][2]; // updating shouldWeContinue flag
-	} while (ShouldWeContinue != -1)
+		ShouldWeContinue = shared_orders[0][2]; // updating shouldWeContinue flag
+	} while (ShouldWeContinue != -1);
 }
