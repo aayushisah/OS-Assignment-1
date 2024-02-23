@@ -11,7 +11,7 @@
 #define READ_END 0
 #define WRITE_END 1
 #define MENU "menu.txt"
-#define MAX_ORDER 50
+#define MAX_ORDER 10
 
 void menuRead(); // func_declaration for function to read the menu
 int **ordersArr(int numberOfCustomer);
@@ -21,13 +21,36 @@ int main()
     int numberOfCustomer;
     // tableNumber being assigned by the user itself is guaranteed
     // Assuming user always gives a valid input
-    printf("Enter Table Number: ");
+    printf("Enter Table Number:");
     scanf("%d", &tableNumber); // between 1 and 10 inclusive
     int ShouldWeContinue = 0;
     // the table process requests to know the number of customers
+    // shared memory segment
+    int tableId = tableNumber;
+    key_t tablekey; // key to identify shared memory segment
+                    // Generate a key for the shared memory segment
+    if ((tablekey = ftok("table.c", tableId)) == -1)
+    {
+        perror("Error in ftok\n");
+        return 1;
+    }
+
+    int shmid = shmget(tablekey, sizeof(int[MAX_CUSTOMERS + 1][MAX_ORDER + 1]), IPC_CREAT | 0666); // read and write both permission given
+    if (shmid == -1)
+    {
+        perror("Error in shmget in creating/ accessing shared memory\n");
+        return 1;
+    }
+    int(*shared_orders)[MAX_CUSTOMERS + 1][MAX_ORDER + 1];
+    shared_orders = shmat(shmid, 0, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
+    if (shared_orders == (void *)-1)
+    {
+        perror("Error in shmPtr in attaching the memory segment\n");
+        return 1;
+    }
     do
     {
-        printf("\nEnter Number of Customers at Table (maximum no. of customers can be 5): ");
+        printf("Enter Number of Customers at Table (maximum no. of customers can be 5):");
         scanf("%d", &numberOfCustomer); // between 1 and 5 inclusive
 
         // displaying the menu to the customer
@@ -35,75 +58,57 @@ int main()
 
         // Dynamically allocate memory for orders array
         int **orders = ordersArr(numberOfCustomer);
-
-        // shared memory segment
-        int tableId = tableNumber;
-        key_t tablekey; // key to identify shared memory segment
-        // Generate a key for the shared memory segment
-        if ((tablekey = ftok("table.c", tableId)) == -1)
-        {
-            perror("Error in ftok\n");
-            return 1;
-        }
-
-        int shmid = shmget(tablekey, sizeof(int) * (MAX_ORDER + 1), IPC_CREAT | 0666); // read and write both permission given
-        if (shmid == -1)
-        {
-            perror("Error in shmget in creating/ accessing shared memory\n");
-            return 1;
-        }
-
-        int(*shared_orders)[MAX_CUSTOMERS + 1][MAX_ORDER + 1] = shmat(shmid, NULL, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
-        if (shared_orders == (void *)-1)
-        {
-            perror("Error in shmPtr in attaching the memory segment\n");
-            return 1;
-        }
         // Copy orders data to shared memory
         // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
-        shared_orders[0][0] = 0;
-        shared_orders[0][1] = numberOfCustomer; // aditya added, delete if causing trouble.
-        for (int i = 1; i < numberOfCustomer + 1; i++)
+        shared_orders[0][0] = -1;
+        shared_orders[0][1] = numberOfCustomer;
+        for (int i = 1; i < MAX_CUSTOMERS + 1; i++)
         {
             for (int j = 1; j < MAX_ORDER + 1; j++)
             {
                 shared_orders[i][j] = orders[i][j];
             }
         }
-
+        shared_orders[0][0] = 0;
         // Wait for waiter to check order validity
         while (shared_orders[0][0] == 0)
         {
-            sleep(1);
         }
-        // shared_orders[0][0]=-1 means invalid
-        while (shared_orders[0][0] == -1)
+        // basically shared_orders[0][0] will return 2 if the orders are valid
+        while (shared_orders[0][0] != 2)
         {
+            shared_orders[0][0] = -1;
             // Order is invalid, prompt customers to give orders again
             printf("Invalid order detected. Please give orders again.\n");
             orders = ordersArr(numberOfCustomer);
             // Copy orders data to shared memory
-            for (int i = 1; i < numberOfCustomer + 1; i++)
+            for (int i = 1; i < MAX_CUSTOMERS + 1; i++)
             {
                 for (int j = 1; j < MAX_ORDER + 1; j++)
                 {
                     shared_orders[i][j] = orders[i][j];
                 }
             }
+            shared_orders[0][0] = 0;
+            while (shared_orders[0][0] == 0)
+            {
+            }
         }
         // asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
         scanf("%d", &ShouldWeContinue);
+
     } while (ShouldWeContinue != -1);
+    shmdt(shared_orders);
 }
 
 // pipe creation
 int **ordersArr(int numberOfCustomer)
 {
-    int **orders = (int **)malloc(sizeof(int *) * numberOfCustomer);
-    for (int i = 0; i < numberOfCustomer; i++)
+    int **orders = (int **)malloc(sizeof(int *) * MAX_ORDER + 1);
+    for (int i = 0; i < MAX_ORDER + 1; i++)
     {
-        orders[i] = (int *)malloc(sizeof(int) * MAX_ORDER);
+        orders[i] = (int *)malloc(sizeof(int) * MAX_ORDER + 1);
     }
     // creation of child process
     pid_t pid;
@@ -116,7 +121,6 @@ int **ordersArr(int numberOfCustomer)
         if (pipe(fd[i]) == -1)
         {
             fprintf(stderr, "Pipe creation failed\n");
-            return 1;
         }
     }
     for (int i = 0; i < numberOfCustomer; i++)
@@ -129,7 +133,6 @@ int **ordersArr(int numberOfCustomer)
         if (pid < 0)
         {
             fprintf(stderr, "Fork Failed");
-            return 1;
         }
         else if (pid == 0)
         {                           // child process
@@ -143,7 +146,7 @@ int **ordersArr(int numberOfCustomer)
                 write(fd[i][WRITE_END], &food_itm, sizeof(food_itm));
             }
             close(fd[i][WRITE_END]); // close write end before exiting
-            return 0;
+            exit(0);
         }
         wait(NULL);
     }
@@ -152,11 +155,15 @@ int **ordersArr(int numberOfCustomer)
     {
         close(fd[i][WRITE_END]);
         int food_itm;
-        int order_count = 0;
+        int order_count = 1;
         // read till you encounter -1
         while (read(fd[i][READ_END], &food_itm, sizeof(food_itm)) > 0)
         {
-            orders[i][order_count++] = food_itm;
+            if (food_itm == -1)
+            {
+                break; // Break out of the loop on termination condition
+            }
+            orders[i + 1][order_count++] = food_itm;
         }
         close(fd[i][READ_END]);
     }
