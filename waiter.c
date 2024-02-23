@@ -18,7 +18,7 @@ int main()
 	int waiterID;
 	printf("Enter Waiter ID: ");
 	scanf("%d", &waiterID);
-	int ShouldWeContinue = 0;
+	int shouldWeContinue = 0;
 
 	do
 	{
@@ -36,27 +36,27 @@ int main()
 		}
 
 		int(*shared_orders)[MAX_CUSTOMERS + 1][MAX_ORDER + 1] = shmat(shmid, NULL, 0); // attached to shared memory
-		int numberOfCustomer = shared_orders[0][1];
+		int numberOfCustomer = *shared_orders[0][1];
 
 		// code to check if order serial numbers exist
-		while (shared_orders[0][0] == 0)
+		while (*shared_orders[0][0] == 0)
 		{
 			// add while loop here to check for corrected order, add a flag for the above one.
 			for (int i = 1; i < numberOfCustomer + 1; i++)
 			{
 				for (int j = 1; j < MAX_ORDER + 1; j++)
 				{
-					if (shared_orders[i][j] == -1)
+					if (*shared_orders[i][j] == -1)
 					{
 						break;
 					}
-					if (shared_orders[i][j] < 1 || shared_orders[i][j] > 4)
+					if (*shared_orders[i][j] < 1 || *shared_orders[i][j] > 4)
 					{
-						shared_orders[0][0] = -1;
+						*shared_orders[0][0] = -1;
 						break;
 					}
 				}
-				if (shared_orders[0][0] == -1)
+				if (*shared_orders[0][0] == -1)
 					;
 				break;
 			}
@@ -64,7 +64,7 @@ int main()
 
 		// code to check total bill amount and creating new shared memory to send total bill to manager
 		//  wait for valid order if invalid? How?
-		if (shared_orders[0][0] == 0)
+		if (*shared_orders[0][0] == 0)
 		{
 			int total_bill = 0;
 			int prices[4] = {30, 40, 25, 30};
@@ -73,7 +73,7 @@ int main()
 			{
 				for (int j = 1; j < MAX_ORDER + 1; j++)
 				{
-					total_bill += prices[shared_orders[i][j] - 1];
+					total_bill += prices[*shared_orders[i][j] - 1];
 				}
 			}
 
@@ -98,11 +98,11 @@ int main()
 
 			// Sending Bill Amount to Manager
 
-			table_bills[WAITER_ID] = total_bill;
+			*table_bills[waiterID] = total_bill;
 		}
 
 		// Termination
 
-		shouldWeContinue = shared_orders[0][2]; // updating shouldWeContinue flag
-	} while (ShouldWeContinue != -1)
+		shouldWeContinue = *shared_orders[0][2]; // updating shouldWeContinue flag
+	} while (shouldWeContinue != -1);
 }
