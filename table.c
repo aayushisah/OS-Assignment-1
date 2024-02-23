@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-
+#include <string.h>
 #define MAX_CUSTOMERS 5 // given in the problem statement maximum number of customers won't exceed 5
 #define MAX_TABLE 10     // table size can be a maximum of 10; monotonically increasing
 #define READ_END 0 // for the file descriptor 
@@ -41,9 +41,12 @@ int main()
         perror("Error in shmget in creating/ accessing shared memory\n");
         return 1;
     }
-
-    int(*shared_orders)[MAX_ORDER + 1];
-    shared_orders = shmat(shmid, 0, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
+    else
+    {
+        printf("SHM id is = %d\n", shmid);
+    }
+    int(*shared_orders)[MAX_ORDER +1];
+    shared_orders = shmat(shmid, NULL, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
     if (shared_orders == (void *)-1)
     {
         perror("Error in shmPtr in attaching the memory segment\n");
@@ -63,6 +66,8 @@ int main()
         // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
         shared_orders[0][0] = 0;
         shared_orders[0][1] = numberOfCustomer; // aditya added, delete if causing trouble.
+        printf("%d\n",shared_orders[0][1]);
+        shared_orders[0][2] = ShouldWeContinue;
         for (int i = 1; i < numberOfCustomer + 1; i++)
         {
             for (int j = 1; j < MAX_ORDER + 1; j++)
@@ -91,8 +96,11 @@ int main()
                 }
             }
             shared_orders[0][0] = 0;
+            printf("Check new order\n");
             while (shared_orders[0][0] == 0)
             {
+                printf("table thinks its %d\n", shared_orders[0][0]);
+                sleep(3);
             }
         }
         // asking the table do we want more customers, end it if we get -1
@@ -100,6 +108,7 @@ int main()
         scanf("%d", &ShouldWeContinue);
         shared_orders[0][2] = ShouldWeContinue; // joy added to pass shouldWeContinue flag in shm
     } while (ShouldWeContinue != -1);
+    printf("Total Bill amount = %d", shared_orders[0][3]);
     shmdt(shared_orders);
 }
 
