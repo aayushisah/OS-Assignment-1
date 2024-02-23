@@ -53,7 +53,7 @@ int main()
             return 1;
         }
 
-        int(*shared_orders)[MAX_ORDER + 1] = shmat(shmid, NULL, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
+        int(*shared_orders)[MAX_CUSTOMERS + 1][MAX_ORDER + 1] = shmat(shmid, NULL, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
         if (shared_orders == (void *)-1)
         {
             perror("Error in shmPtr in attaching the memory segment\n");
