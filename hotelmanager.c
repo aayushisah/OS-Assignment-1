@@ -1,24 +1,42 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-//#include <sys/ipc.h>
-//#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include <stdlib.h>
 #define BILL "earnings.txt"
 
 
 int main()
 {   
-    //key_t key = ftok("/tmp/memfile", 'R');
-    //int shmid = shmget(key, sizeof(int), 0666|IPC_CREAT);
-    
-    
+  // Creating a shared-memory between Manager-Waiter
+
+			key_t billkey;
+			if ((billkey = ftok("waiter.c", waiterID)) == -1)
+			{
+				perror("Error in ftok\n");
+				return 1;
+			}
+			int shmid_bills = shmget(billkey, sizeof(int) * 10, IPC_CREAT | 0666);
+			if (shmid_bills == -1)
+			{
+				perror("Error in creating/accessing shared memory\n");
+				return 1;
+			}
+
+	         int(*table_bills)[10] = shmat(shmid_bills, NULL, 0);
+
+             shmdt(table_bills);
+
+	// Sending Bill Amount to Manager
+
+	//table_bills[WAITER_ID] = total_bill;
 
     int ntables;
     printf("Enter the Total Number of Tables at the Hotel: ");
     scanf("%d", &ntables);
     
-   int earnings_array[] = {1,2,3};
+   int earnings_array[ntables-1];
 
     FILE *fptr;
     fptr = fopen("earnings.txt", "w");
@@ -34,15 +52,16 @@ int main()
         earnings_total += earnings_array[i];
     }
     
-    double wages = 0.4*earnings_total;
-    double profit = earnings_total - wages;
+    double total_wages = 0.4*earnings_total;
+    double total_profit = earnings_total - wages;
     
-    fprintf(fptr,"Total Earnings of Hotel: %.2f INR", earnings_total);
-    fprintf(fptr,"Total Wages of Waiters: %.2f INR", wages);
-    fprintf(fptr,"Total Profit: %.2f INR", profit);
+    fprintf(fptr,"Total Earnings of Hotel: %.2f INR\n", earnings_total);
+    fprintf(fptr,"Total Wages of Waiters: %.2f INR\n", total_wages);
+    fprintf(fptr,"Total Profit: %.2f INR\n", total_profit);
 
     fclose(fptr);
     
     printf("Thank you for visiting the Hotel!");
     exit(0);
 }
+
