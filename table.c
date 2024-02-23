@@ -60,9 +60,10 @@ int main()
         int **orders = ordersArr(numberOfCustomer);
         // Copy orders data to shared memory
         // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
-        shared_orders[0][0] = -1;
-        shared_orders[0][1] = numberOfCustomer;
-        for (int i = 1; i < MAX_CUSTOMERS + 1; i++)
+        shared_orders[0][0] = 0;
+        shared_orders[0][1] = numberOfCustomer; // aditya added, delete if causing trouble.
+        shared_orders[0][2] = shouldWeContinue; // joy added to pass shouldWeContinue flag in shm
+        for (int i = 1; i < numberOfCustomer + 1; i++)
         {
             for (int j = 1; j < MAX_ORDER + 1; j++)
             {
