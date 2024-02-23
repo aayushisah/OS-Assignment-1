@@ -57,10 +57,11 @@ int main()
 					}
 				}
 				if (*shared_orders[0][0] == -1)
-					;
-				break;
+				{
+					break;
+				}				
 			}
-			*shared_orders[0][0] = 2;	//returning 2 if order is valid.
+			*shared_orders[0][0] = 2;	//returning 2 if order is valid
 		}
 
 		// code to check total bill amount and creating new shared memory to send total bill to manager
