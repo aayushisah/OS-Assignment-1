@@ -21,13 +21,13 @@ int main()
     int numberOfCustomer;
     // tableNumber being assigned by the user itself is guaranteed
     // Assuming user always gives a valid input
-    printf("Enter Table Number:");
+    printf("Enter Table Number: ");
     scanf("%d", &tableNumber); // between 1 and 10 inclusive
     int ShouldWeContinue = 0;
     // the table process requests to know the number of customers
     do
     {
-        printf("Enter Number of Customers at Table (maximum no. of customers can be 5):");
+        printf("\nEnter Number of Customers at Table (maximum no. of customers can be 5): ");
         scanf("%d", &numberOfCustomer); // between 1 and 5 inclusive
 
         // displaying the menu to the customer
@@ -62,6 +62,7 @@ int main()
         // Copy orders data to shared memory
         // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
         shared_orders[0][0] = 0;
+	shared_orders[0][1] = numberOfCustomer; //aditya added, delete if causing trouble.
         for (int i = 1; i < numberOfCustomer + 1; i++)
         {
             for (int j = 1; j < MAX_ORDER + 1; j++)
@@ -89,6 +90,7 @@ int main()
                     shared_orders[i][j] = orders[i][j];
                 }
             }
+		
         }
         // asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
