@@ -37,7 +37,7 @@ int main()
         int **orders = ordersArr(numberOfCustomer);
 
         // shared memory segment
-        int tableId = getpid() % MAX_TABLE;
+        int tableId = tableNumber;
         key_t tablekey; // key to identify shared memory segment
         // Generate a key for the shared memory segment
         if ((tablekey = ftok("table.c", tableId)) == -1)
@@ -62,7 +62,7 @@ int main()
         // Copy orders data to shared memory
         // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
         shared_orders[0][0] = 0;
-	shared_orders[0][1] = numberOfCustomer; //aditya added, delete if causing trouble.
+        shared_orders[0][1] = numberOfCustomer; // aditya added, delete if causing trouble.
         for (int i = 1; i < numberOfCustomer + 1; i++)
         {
             for (int j = 1; j < MAX_ORDER + 1; j++)
@@ -90,7 +90,6 @@ int main()
                     shared_orders[i][j] = orders[i][j];
                 }
             }
-		
         }
         // asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
