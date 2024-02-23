@@ -7,8 +7,8 @@
 #include <sys/shm.h>
 
 #define MAX_CUSTOMERS 5 // given in the problem statement maximum number of customers won't exceed 5
-#define MAX_TABLE 10     // table size can be a maximum of 10; monotonically increasing
-#define READ_END 0 // for the file descriptor 
+#define MAX_TABLE 5     // table size
+#define READ_END 0
 #define WRITE_END 1
 #define MENU "menu.txt"
 #define MAX_ORDER 10
@@ -75,7 +75,7 @@ int main()
         while (shared_orders[0][0] == -1)
         {
         }
-        // basically shared_orders[0][0] will return 2 if the orders are valid
+        // basically shared_orders[0][0] will return 1 if the orders are valid
         while (shared_orders[0][0] != 1)
         {
             shared_orders[0][0] = -1;
@@ -90,8 +90,8 @@ int main()
                     shared_orders[i][j] = orders[i][j];
                 }
             }
-            shared_orders[0][0] = 0;
-            while (shared_orders[0][0] == 0)
+            shared_orders[0][0] = -1;
+            while (shared_orders[0][0] == -1)
             {
             }
         }
@@ -106,7 +106,7 @@ int main()
 // pipe creation
 int **ordersArr(int numberOfCustomer)
 {
-    int **orders = (int **)malloc(sizeof(int *) * MAX_ORDER + 1); // 2d array
+    int **orders = (int **)malloc(sizeof(int *) * MAX_ORDER + 1);
     for (int i = 0; i < MAX_ORDER + 1; i++)
     {
         orders[i] = (int *)malloc(sizeof(int) * MAX_ORDER + 1);
@@ -141,7 +141,7 @@ int **ordersArr(int numberOfCustomer)
             int food_itm = 0;
             while (food_itm != -1)
             {
-                printf("%d", i); /// comment it out for correct output format, debugging purpose
+                printf("%d", i); /// comment it outt for correct output format, debugging purpose
                 printf("Enter the serial number(s) of the item(s) to order from the menu. Enter -1 when done:\n");
                 scanf("%d", &food_itm);
                 write(fd[i][WRITE_END], &food_itm, sizeof(food_itm));
@@ -157,10 +157,10 @@ int **ordersArr(int numberOfCustomer)
         close(fd[i][WRITE_END]);
         int food_itm;
         int order_count = 1;
-        // read till you encounter -1
-        while (read(fd[i][READ_END], &food_itm, sizeof(food_itm))) // read from the pipe
+        
+        while (read(fd[i][READ_END], &food_itm, sizeof(food_itm)))
         {
-            orders[i + 1][order_count++] = food_itm; // store the order in the 2d array
+            orders[i + 1][order_count++] = food_itm;
         }
         close(fd[i][READ_END]);
     }
