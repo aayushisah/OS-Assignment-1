@@ -44,7 +44,7 @@ int main(){
 		}
 			if(shared_orders[i][j] < 1 || shared_orders[i][j] > 4)
 			{
-			    shared_orders[i][j] = -1;
+			    shared_orders[0][0] = -1;
 			}
 	    }  
 	}
