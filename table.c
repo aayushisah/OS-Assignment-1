@@ -35,14 +35,14 @@ int main()
         return 1;
     }
 
-    int shmid = shmget(tablekey, sizeof(int[MAX_CUSTOMERS + 1][MAX_ORDER + 1]), IPC_CREAT | 0666); // read and write both permission given
+    int shmid = shmget(tablekey, sizeof(int[MAX_ORDER + 1][MAX_ORDER + 1]), IPC_CREAT | 0666); // read and write both permission given
     if (shmid == -1)
     {
         perror("Error in shmget in creating/ accessing shared memory\n");
         return 1;
     }
 
-    int(*shared_orders)[MAX_CUSTOMERS + 1][MAX_ORDER + 1];
+    int(*shared_orders)[MAX_ORDER + 1];
     shared_orders = shmat(shmid, 0, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
     if (shared_orders == (void *)-1)
     {
@@ -98,7 +98,7 @@ int main()
         // asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
         scanf("%d", &ShouldWeContinue);
-        shared_orders[0][2] = shouldWeContinue; // joy added to pass shouldWeContinue flag in shm
+        shared_orders[0][2] = ShouldWeContinue; // joy added to pass shouldWeContinue flag in shm
     } while (ShouldWeContinue != -1);
     shmdt(shared_orders);
 }
