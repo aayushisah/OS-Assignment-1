@@ -35,19 +35,26 @@ int main(){
 	int numberOfCustomer = shared_orders[0][1];
 
     //code to check if order serial numbers exist
-	for(int i = 1;  i < numberOfCustomer + 1; i++)
-	{
-	    for(int j = 1; j < MAX_ORDER + 1; j++)
-	    {
-	    	if(shared_orders[i][j] == -1){
-		    break;
-		}
-			if(shared_orders[i][j] < 1 || shared_orders[i][j] > 4)
+	while(shared_orders[0][0]==0){
+		//add while loop here to check for corrected order, add a flag for the above one.
+		for(int i = 1;  i < numberOfCustomer + 1; i++)
+		{
+			for(int j = 1; j < MAX_ORDER + 1; j++)
 			{
-			    shared_orders[0][0] = -1;
-			}
-	    }  
+				if(shared_orders[i][j] == -1){
+					break;
+				}
+				if(shared_orders[i][j] < 1 || shared_orders[i][j] > 4)
+				{
+					shared_orders[0][0] = -1;
+					break;
+				}
+			}  
+			if(shared_orders[0][0] == -1);
+					break;
+		}
 	}
+
     //code to check total bill amount and creating new shared memory to send total bill to manager
 	// wait for valid order if invalid? How?
 	int total_bill = 0;
