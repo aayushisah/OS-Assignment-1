@@ -103,8 +103,11 @@ int main()
                 sleep(3);
             }
         }
+		while(shared_orders[0][3] == -1){
+		}
         printf("Total Bill amount = %d\n", shared_orders[0][3]);
-        // asking the table do we want more customers, end it if we get -1
+		
+		// asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
         scanf("%d", &ShouldWeContinue);
         shared_orders[0][2] = ShouldWeContinue; // joy added to pass shouldWeContinue flag in shm
