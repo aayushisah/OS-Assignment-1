@@ -12,7 +12,7 @@
 #define WRITE_END 1
 #define MENU "menu.txt"
 #define MAX_ORDER 10
-
+// double* returnPriceArray();
 int main()
 {
 	int waiterID;
@@ -43,14 +43,13 @@ int main()
 		{
 			printf("shmid also done. It is = %d\n", shmid);
 		}
-       
-	   	// attached to shared memory
+
+		// attached to shared memory
 		int(*shared_orders)[MAX_ORDER + 1];
-		shared_orders = shmat(shmid, NULL, 0); 
+		shared_orders = shmat(shmid, NULL, 0);
 
 		int numberOfCustomer = shared_orders[0][1];
 		printf("Number of customers = %d\n", numberOfCustomer);
-
 
 		// code to check if order serial numbers exist
 		while (shared_orders[0][0] == -1)
@@ -77,7 +76,7 @@ int main()
 				if (i == numberOfCustomer)
 				{
 					shared_orders[0][0] = 2;
-					shared_orders[0][3]= -1; // to make table.c wait for the bill
+					shared_orders[0][3] = -1; // to make table.c wait for the bill
 				}
 			}
 			while (shared_orders[0][0] == 0)
@@ -89,8 +88,7 @@ int main()
 		printf("Order valid!\n");
 		shared_orders[0][0] = 2; // returning 2 if order is valid
 
-
-		//check total bill and creating new shared memory to send total bill to manager
+		// check total bill and creating new shared memory to send total bill to manager
 		if (shared_orders[0][0] == 2)
 		{
 			int total_bill = 0;
@@ -109,7 +107,7 @@ int main()
 			printf("Bill Amount for Table X: %d INR\n", total_bill);
 			shared_orders[0][3] = total_bill;
 
-		// Creating a shared-memory between Manager-Waiter
+			// Creating a shared-memory between Manager-Waiter
 
 			key_t billkey;
 			if ((billkey = ftok("waiter.c", waiterID)) == -1)
@@ -118,30 +116,29 @@ int main()
 				return 1;
 			}
 
-		   	int shmid_bills = shmget(billkey, sizeof(int) * 10, IPC_CREAT | 0666); 
-		 	if (shmid_bills == -1)
+			int shmid_bills = shmget(billkey, sizeof(int) * 10, IPC_CREAT | 0666);
+			if (shmid_bills == -1)
 			{
-		 		perror("Error in creating/accessing shared memory\n");
+				perror("Error in creating/accessing shared memory\n");
 				return 1;
 			}
 
-			int (*table_bills)[10];
+			int(*table_bills)[10];
 			table_bills = shmat(shmid_bills, NULL, 0);
 
 			// Sending Bill Amount to Manager
-			
+
 			*table_bills[waiterID] = total_bill;
-			int amt = *table_bills[waiterID]; //testing
+			int amt = *table_bills[waiterID]; // testing
 			printf("manager received bill: %d from waiter %d/n", amt, waiterID);
-	
+
 			shmdt(table_bills);
-	
 		}
 
 		// Terminate process & detach shared-memory
 
 		shared_orders[0][2] = 0;
-while (shared_orders[0][2] == 0)
+		while (shared_orders[0][2] == 0)
 		{
 		}
 
@@ -150,3 +147,47 @@ while (shared_orders[0][2] == 0)
 
 	} while (shouldWeContinue != -1);
 }
+
+/*double* returnPriceArray(){
+FILE *file;
+char line[100];
+int itemCount = 0;
+
+file = fopen("menu.txt", "r");
+if (file == NULL) {
+	printf("Error opening file\n");
+	return 1;
+}
+
+//basically this function reads the first one digit
+while (fgets(line, sizeof(line), file)) {
+	int itemNumber;
+	if ((sscanf(line, "%d.", &itemNumber) == 1) {
+		itemCount++;
+	}
+}
+
+//why i am using double because i dont know the data type of what can be in menu.txt, can be integer/double so
+double* arr = (double*)malloc(itemCount * sizeof(double));
+if (arr == NULL) {
+	fclose(file);
+	return NULL;
+}
+
+// Read prices and store in the array
+rewind(file); // Reset file pointer to start
+ int count=0;
+ while (fgets(line, sizeof(line), file)) {
+	char priceStr[100];
+	double  price;
+	//sscanf is returning whatever is after characters, matching with INR, so basically returning string before INR
+	if (sscanf(line, "%*d. %*[^0-9]%[^ ] INR",priceStr) == 1) {
+		price = atof(priceStr);
+		if(count<itemCount)
+		arr[count++]=price;
+	}
+}
+
+fclose(file);
+return arr;
+} */
