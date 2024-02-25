@@ -3,8 +3,10 @@
 #include <unistd.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <strings.h>
 
 #define MAX_TABLES 10 // Maximum number of tables
+#define SHM_KEY 12345 //temp key for admin-manager shm
 
 // Structure for holding earnings information
 typedef struct {
@@ -95,6 +97,21 @@ int main() {
     // Detach shared memory segment
     shmdt(table_bills);
     }
+
+    //Creating shared memory between admin and manager
+    int *terminateHotel;
+    key_t terminationkey;
+    if ((terminationkey = ftok("admin.c", SHM_KEY)) == -1) {
+        perror("Error in ftok\n");
+        return 1;
+    }
+    int shmid = shmget(terminationkey, sizeof(int), IPC_CREAT | 0666);
+    if (shmid == -1) {
+        perror("Error in creating/accessing shared memory\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    terminateHotel = (int *)shmat(shm_id, NULL, 0);
 
     // Write earnings to file and print them on console
     write_earnings_to_file(earnings, num_tables, total_earnings);
