@@ -22,9 +22,6 @@ int main()
 	int shouldWeContinue = 0;
 
 	double* prices = returnPriceArray();
-	for(int i=0; i<itemCount; i++){
-		printf("%lf\n", prices[i]);
-	}
 
 	do
 	{
