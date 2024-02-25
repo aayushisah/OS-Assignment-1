@@ -118,20 +118,21 @@ int main()
 				return 1;
 			}
 
-			int shmid_bills = shmget(billkey, sizeof(int) * 10, IPC_CREAT | 0666);
+			int shmid_bills = shmget(billkey, sizeof(int), IPC_CREAT | 0666);
 			if (shmid_bills == -1)
 			{
 				perror("Error in creating/accessing shared memory\n");
 				return 1;
 			}
-
-			int(*table_bills)[10];
+			printf("tABLE is connecged to %d\n", shmid_bills);
+			int (*table_bills);
 			table_bills = shmat(shmid_bills, NULL, 0);
 
 			// Sending Bill Amount to Manager
 
-			*table_bills[waiterID] = total_bill;
-			int amt = *table_bills[waiterID]; // testing
+			table_bills = (int) total_bill;
+			printf("waiter thinks he sent %d\n", &table_bills);
+			int amt = table_bills; // testing
 			printf("manager received bill: %d from waiter %d\n", amt, waiterID);
 
 			shmdt(table_bills);
