@@ -1,67 +1,152 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <stdlib.h>
-#define BILL "earnings.txt"
+#include<string.h>
 
+#define MAX_TABLES 10 // Maximum number of tables
+#define SHM_KEY 12345 //temp key for shared memory btwn admin and manager
 
-int main()
-{   
-  // Creating a shared-memory between Manager-Waiter
+// Structure for holding earnings information
+typedef struct {
+    int table_number;
+    int earnings;
+} EarningsInfo;
 
-			key_t billkey;
-			if ((billkey = ftok("waiter.c", waiterID)) == -1)
-			{
-				perror("Error in ftok\n");
-				return 1;
-			}
-			int shmid_bills = shmget(billkey, sizeof(int) * 10, IPC_CREAT | 0666);
-			if (shmid_bills == -1)
-			{
-				perror("Error in creating/accessing shared memory\n");
-				return 1;
-			}
-
-	         int(*table_bills)[10] = shmat(shmid_bills, NULL, 0);
-
-             shmdt(table_bills);
-
-	// Sending Bill Amount to Manager
-
-	//table_bills[WAITER_ID] = total_bill;
-
-    int ntables;
-    printf("Enter the Total Number of Tables at the Hotel: ");
-    scanf("%d", &ntables);
-    
-   int earnings_array[ntables-1];
-
-    FILE *fptr;
-    fptr = fopen("earnings.txt", "w");
-
-    for (int i = 0; i < ntables; i++) {
-        fprintf(fptr, "Earning from Table %d: %d INR\n", earnings_array[i]);
+// Function to write earnings to file and print them on console
+void Earnings_to_file(EarningsInfo) {
+    FILE *file = fopen("earnings.txt", "w");
+    if (file == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
     }
 
-    double earnings_total = 0;
     
-    for (int i=0; i < ntables; i++)
-    {
-        earnings_total += earnings_array[i];
-    }
+        fprintf(file, "Earning from Table %d: %d INR\n", earnings[i].table_number, earnings[i].earnings);
     
-    double total_wages = 0.4*earnings_total;
-    double total_profit = earnings_total - total_wages;
-    
-    fprintf(fptr,"Total Earnings of Hotel: %.2f INR\n", earnings_total);
-    fprintf(fptr,"Total Wages of Waiters: %.2f INR\n", total_wages);
-    fprintf(fptr,"Total Profit: %.2f INR\n", total_profit);
 
-    fclose(fptr);
     
-    printf("Thank you for visiting the Hotel!");
-    exit(0);
 }
 
+int main() {
+    int num_tables;
+
+    // Prompt user to enter the number of tables
+    printf("Enter the total number of tables at the hotel (max %d): ", MAX_TABLES);
+    scanf("%d", &num_tables);
+
+    if (num_tables <= 0 || num_tables > MAX_TABLES) {
+        printf("Invalid number of tables. Exiting...\n");
+        return 1;
+    }
+
+    // Placeholder for actual earnings calculation
+    EarningsInfo earnings[num_tables];
+    int total_earnings = 0;
+
+     int(*table_bills)[10];  
+    // Initialize earnings for each table to 0
+    for (int i = 0; i < num_tables; i++) {
+        earnings[i].table_number = i + 1; // Assuming table numbers start from 1
+        earnings[i].earnings = 0;
+    }
+
+ //shared memory between admin and hotel manager
+    int *terminateHotel;
+    key_t terminationkey;
+    if ((terminationkey = ftok("admin.c", SHM_KEY)) == -1) {
+        perror("Error in ftok\n");
+        return 1;
+    }
+
+    int shmid = shmget(terminationkey, sizeof(int), IPC_CREAT | 0666);
+    if (shmid == -1) {
+        perror("Error in creating/accessing shared memory\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    terminateHotel = (int *)shmat(shm_id, NULL, 0);
+    // Create shared memory segment to receive earnings from waiters
+     int count=0;
+    int waiterID;
+    while( terminateHotel!=0 || count!=num_tables)
+    {for(int i=0; i<num_tables; i++ ){
+     waiterID= earnings[i].table_number ;
+    int *Customercount;
+    key_t Customercountkey;
+    if ((Customercountkey = ftok("waiter.c", waiterID)) == -1) {
+        perror("Error in ftok\n");
+        return 1;
+    }
+
+    int shmid = shmget(Customercountkey, sizeof(int), IPC_CREAT | 0666);
+    if (shmid == -1) {
+        perror("Error in creating/accessing shared memory\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    Customercount = (int *)shmat(shm_id, NULL, 0);
+    if(Customercount==-1)  //-1 means no customer at that table rn
+    {
+        count++;
+        continue;
+    }
+   
+    
+    key_t billkey;
+    if ((billkey = ftok("waiter.c", waiterID)) == -1) {
+        perror("Error in ftok\n");
+        return 1;
+    }
+
+    int shmid_bills = shmget(billkey, sizeof(int), IPC_CREAT | 0666);
+    if (shmid_bills == -1) {
+        perror("Error in creating/accessing shared memory\n");
+        return 1;
+    }
+
+    // Attach shared memory segment
+   
+    table_bills[i] = shmat(shmid_bills, NULL, 0);
+
+    // Read earnings from waiters and update the earnings for each table
+    if(*table_bills[i]!=0)
+        {earnings[i].earnings = (*table_bills)[i];
+        total_earnings += earnings[i].earnings;
+        Earnings_to_file(earnings[i]);}
+
+    // Detach shared memory segment
+   
+    }
+    }
+    shmdt(table_bills);
+   
+    FILE *file = fopen("earnings.txt", "w");
+    if (file == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+    // Write total earnings to file
+    fprintf(file, "Total Earnings of Hotel: %d INR\n", total_earnings);
+
+    // Assuming total wages is 40% of total earnings
+    int total_wages = total_earnings * 0.4;
+
+    // Write total wages to file
+    fprintf(file, "Total Wages of Waiters: %d INR\n", total_wages);
+
+    // Calculate and write total profit to file
+    int total_profit = total_earnings - total_wages;
+    fprintf(file, "Total Profit: %d INR\n", total_profit);
+
+
+    fclose(file);
+
+
+
+    // Display terminating message
+    printf("Thank you for visiting the Hotel!\n");
+
+    return 0;
+}
