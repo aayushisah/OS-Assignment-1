@@ -62,6 +62,7 @@ int main() {
     // Placeholder for actual earnings calculation
     EarningsInfo earnings[MAX_TABLES];
     int total_earnings = 0;
+    int(*table_bills)[10];
 
     // Initialize earnings for each table to 0
     for (int i = 0; i < num_tables; i++) {
@@ -87,8 +88,8 @@ int main() {
     }
 
     // Attach shared memory segment
-    int(*table_bills)[10];
-    table_bills = shmat(shmid_bills, NULL, 0);
+    
+    table_bills[i] = shmat(shmid_bills, NULL, 0);
 
     // Read earnings from waiters and update the earnings for each table
         earnings[i].earnings = (*table_bills)[i];
