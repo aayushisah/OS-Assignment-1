@@ -66,12 +66,12 @@ int main() {
         earnings[i].table_number = i + 1; // Assuming table numbers start from 1
         earnings[i].earnings = 0;
     }
-
     // Create shared memory segment to receive earnings from waiters
     int waiterID;
+    
     for(int i=0; i<num_tables; i++ ){
     waiterID= earnings[i].table_number ;
-    }
+        
     key_t billkey;
     if ((billkey = ftok("waiter.c", waiterID)) == -1) {
         perror("Error in ftok\n");
@@ -89,13 +89,12 @@ int main() {
     table_bills = shmat(shmid_bills, NULL, 0);
 
     // Read earnings from waiters and update the earnings for each table
-    for (int i = 0; i < num_tables; i++) {
         earnings[i].earnings = (*table_bills)[i];
         total_earnings += earnings[i].earnings;
-    }
 
     // Detach shared memory segment
     shmdt(table_bills);
+    }
 
     // Write earnings to file and print them on console
     write_earnings_to_file(earnings, num_tables, total_earnings);
