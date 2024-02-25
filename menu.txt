@@ -2,3 +2,5 @@
 2. Chicken Burger 40 INR
 3. Ostrich Eggs 25 INR
 4. Egg Frankie 30 INR
+5. Yummpies Fries 60 INR
+6. Egg Bhruji 45 INR
