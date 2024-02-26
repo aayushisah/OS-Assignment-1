@@ -52,6 +52,7 @@ int main()
         perror("Error in shmPtr in attaching the memory segment\n");
         return 1;
     }
+    shared_orders[0][5] = 0;;
     do
     {
         printf("Enter Number of Customers at Table (maximum no. of customers can be 5):");
@@ -76,7 +77,7 @@ int main()
             }
         }
         shared_orders[0][0] = -1;
-        shared_orders[0][4] = 1;
+        shared_orders[0][4] = 1; 
         // Wait for waiter to check order validity
         while (shared_orders[0][0] == -1)
         {
@@ -107,14 +108,20 @@ int main()
 		while(shared_orders[0][3] == -1){
 		}
         printf("Total Bill amount = %d\n", shared_orders[0][3]);
-		shared_orders[0][4] = 0;
+		shared_orders[0][4] = 0; // order ready for waiter = 1
 
 		// asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
         scanf("%d", &ShouldWeContinue);
-        shared_orders[0][2] = ShouldWeContinue; // joy added to pass shouldWeContinue flag in shm
-    } while (ShouldWeContinue != -1);
+        if(ShouldWeContinue>0)
+            shared_orders[0][2] = 1;
+        else
+            shared_orders[0][2] = ShouldWeContinue; 
 
+
+    } while (ShouldWeContinue != -1);
+    shared_orders[0][5] = 1;
+    printf("i have given the order to close\n");
     shmdt(shared_orders);
 }
 
