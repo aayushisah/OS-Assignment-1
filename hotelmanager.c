@@ -49,9 +49,9 @@ int main() {
  //shared memory between admin and hotel manager
    
     // Create shared memory segment to receive earnings from waiters
-     int count=0;
+    int count=num_tables; //active tables
     int waiterID;
-    while(count!=num_tables)
+    while(count!=0)
         {for(int i=0; i<num_tables; i++ ){
             waiterID= i+1;
             key_t billkey;
@@ -78,7 +78,6 @@ int main() {
             table_bills = shmat(shmid_bills, NULL, 0);
             if(*table_bills==0) 
             {
-                count++;
 				shmdt(table_bills);
                 continue;
              }
@@ -89,6 +88,11 @@ int main() {
                 *table_bills = 0;
                 Earnings_to_file(bills);
 			}
+            else if(*table_bills==-2){
+                count--;
+                printf("table %d closed, %d remain active\n", i+1, count);
+                *table_bills = 0;
+            }
             // Read earnings from waiters and update the earnings for each table
 			else{
 				bills.table_number = i+1;
@@ -96,15 +100,14 @@ int main() {
                 total_earnings += bills.earnings;
                 *table_bills = 0;
                 Earnings_to_file(bills);
-				printf("that memlocation is now set to %d\n", *table_bills);
-				sleep(1);
+				//printf("that memlocation is now set to %d\n", *table_bills);
             }
             // Detach shared memory segment
 			shmdt(table_bills);
         }
     }
    
-    FILE *file = fopen("earnings.txt", "w");
+    FILE *file = fopen("earnings.txt", "a");
     if (file == NULL) {
         printf("fopen");
         exit(EXIT_FAILURE);
