@@ -55,6 +55,9 @@ int main()
 
 		int numberOfCustomer = shared_orders[0][1];
 		printf("Number of customers = %d\n", numberOfCustomer);
+        while(numberOfCustomer==0){
+            numberOfCustomer = shared_orders[0][1];
+        }
 
 		// code to check if order serial numbers exist
 		while (shared_orders[0][0] == -1)
@@ -164,6 +167,7 @@ int main()
                 *table_bills = -2;
                 printf("i sent flag to manager\n");
                 shouldWeContinue = -1;
+                shared_orders[0][1] = 0;
                 break;
             }
             sleep(2);

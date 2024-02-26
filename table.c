@@ -52,12 +52,14 @@ int main()
         perror("Error in shmPtr in attaching the memory segment\n");
         return 1;
     }
-    shared_orders[0][5] = 0;;
+    shared_orders[0][1] = 0;
+    shared_orders[0][5] = 0;
+
+    printf("Enter Number of Customers at Table (maximum no. of customers can be 5): ");
+    scanf("%d", &numberOfCustomer); // between 1 and 5 inclusive
+    
     do
     {
-        printf("Enter Number of Customers at Table (maximum no. of customers can be 5):");
-        scanf("%d", &numberOfCustomer); // between 1 and 5 inclusive
-
         // displaying the menu to the customer
         menuRead();
 
@@ -66,8 +68,8 @@ int main()
         // Copy orders data to shared memory
         // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
         shared_orders[0][0] = 0;
-        shared_orders[0][1] = numberOfCustomer; // aditya added, delete if causing trouble.
-        printf("%d\n", shared_orders[0][1]);
+       // shared_orders[0][1] = numberOfCustomer; // aditya added, delete if causing trouble.
+      //  printf("%d\n", shared_orders[0][1]);
         shared_orders[0][2] = ShouldWeContinue;
         for (int i = 1; i < numberOfCustomer + 1; i++)
         {
@@ -77,6 +79,7 @@ int main()
             }
         }
         shared_orders[0][0] = -1;
+        shared_orders[0][1] = numberOfCustomer;
         shared_orders[0][4] = 1; 
         // Wait for waiter to check order validity
         while (shared_orders[0][0] == -1)
@@ -111,13 +114,15 @@ int main()
 		shared_orders[0][4] = 0; // order ready for waiter = 1
 
 		// asking the table do we want more customers, end it if we get -1
-        printf("Do you want more customers?");
+        printf("Enter Number of Customers at Table (maximum no. of customers can be 5):");
         scanf("%d", &ShouldWeContinue);
-        if(ShouldWeContinue>0)
+        if(ShouldWeContinue>0){
+            numberOfCustomer = ShouldWeContinue;
             shared_orders[0][2] = 1;
-        else
+        }
+        else{
             shared_orders[0][2] = ShouldWeContinue; 
-
+        }
 
     } while (ShouldWeContinue != -1);
     shared_orders[0][5] = 1;

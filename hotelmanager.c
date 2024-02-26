@@ -123,21 +123,21 @@ int main() {
     }
     // Write total earnings to file
     fprintf(file, "\nTotal Earnings of Hotel: %d INR\n", total_earnings);
+    printf("\nTotal Earnings of Hotel: %d INR\n", total_earnings);
 
     // Assuming total wages is 40% of total earnings
     int total_wages = total_earnings * 0.4;
 
     // Write total wages to file
     fprintf(file, "Total Wages of Waiters: %d INR\n", total_wages);
+    printf("Total Wages of Waiters: %d INR\n", total_wages);
 
     // Calculate and write total profit to file
     int total_profit = total_earnings - total_wages;
     fprintf(file, "Total Profit: %d INR\n", total_profit);
-
+    printf("Total Profit: %d INR\n", total_profit);
 
     fclose(file);
-
-
 
     // Display terminating message
     printf("Thank you for visiting the Hotel!\n");
