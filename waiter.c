@@ -126,7 +126,7 @@ int main()
 				perror("Error in creating/accessing shared memory\n");
 				return 1;
 			}
-			printf("tABLE is connecged to %d\n", shmid_bills);
+			printf("table is connected to %d\n", shmid_bills);
 			int (*table_bills);
 			table_bills = shmat(shmid_bills, NULL, 0);
 
