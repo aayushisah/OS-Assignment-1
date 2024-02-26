@@ -12,8 +12,10 @@
 #define WRITE_END 1
 #define MENU "menu.txt"
 #define MAX_ORDER 10
+
 double* returnPriceArray();
 int itemCount;
+
 int main()
 {
 	int waiterID;
@@ -130,9 +132,9 @@ int main()
 
 			// Sending Bill Amount to Manager
 
-			table_bills = (int) total_bill;
-			printf("waiter thinks he sent %d\n", &table_bills);
-			int amt = table_bills; // testing
+			*table_bills = (int)total_bill;
+			printf("waiter thinks he sent %d\n", *table_bills);
+			int amt = *table_bills; // testing
 			printf("manager received bill: %d from waiter %d\n", amt, waiterID);
 
 			shmdt(table_bills);
@@ -149,48 +151,57 @@ int main()
 		shmdt(shared_orders);
 
 	} while (shouldWeContinue != -1);
+
+	return 0;
 }
 
-double* returnPriceArray(){
-FILE *file;
-char line[100];
-itemCount = 0;
+double* returnPriceArray()
+{
+	FILE *file;
+	char line[100];
+	itemCount = 0;
 
-file = fopen("menu.txt", "r");
-if (file == NULL) {
-	printf("Error opening file\n");
-	return (double*) 1;
-}
-
-//basically this function reads the first one digit
-while (fgets(line, sizeof(line), file)) {
-	int itemNumber;
-	if (sscanf(line, "%d.", &itemNumber) == 1) {
-		itemCount++;
+	file = fopen("menu.txt", "r");
+	if (file == NULL)
+	{
+		printf("Error opening file\n");
+		return (double*)1;
 	}
-}
 
-//why i am using double because i dont know the data type of what can be in menu.txt, can be integer/double so
-double* arr = (double*)malloc(itemCount * sizeof(double));
-if (arr == NULL) {
+	//basically this function reads the first one digit
+	while (fgets(line, sizeof(line), file))
+	{
+		int itemNumber;
+		if (sscanf(line, "%d.", &itemNumber) == 1)
+		{
+			itemCount++;
+		}
+	}
+
+	//why i am using double because i dont know the data type of what can be in menu.txt, can be integer/double so
+	double* arr = (double*)malloc(itemCount * sizeof(double));
+	if (arr == NULL)
+	{
+		fclose(file);
+		return NULL;
+	}
+
+	// Read prices and store in the array
+	rewind(file); // Reset file pointer to start
+	int count = 0;
+	while (fgets(line, sizeof(line), file))
+	{
+		char priceStr[100];
+		double  price;
+		//sscanf is returning whatever is after characters, matching with INR, so basically returning string before INR
+		if (sscanf(line, "%*d. %*[^0-9]%[^ ] INR", priceStr) == 1)
+		{
+			price = atof(priceStr);
+			if (count < itemCount)
+				arr[count++] = price;
+		}
+	}
+
 	fclose(file);
-	return NULL;
-}
-
-// Read prices and store in the array
-rewind(file); // Reset file pointer to start
- int count=0;
- while (fgets(line, sizeof(line), file)) {
-	char priceStr[100];
-	double  price;
-	//sscanf is returning whatever is after characters, matching with INR, so basically returning string before INR
-	if (sscanf(line, "%*d. %*[^0-9]%[^ ] INR",priceStr) == 1) {
-		price = atof(priceStr);
-		if(count<itemCount)
-		arr[count++]=price;
-	}
-}
-
-fclose(file);
-return arr;
+	return arr;
 }
