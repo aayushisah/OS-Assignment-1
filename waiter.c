@@ -93,6 +93,7 @@ int main()
 		printf("Order valid!\n");
 		shared_orders[0][0] = 2; // returning 2 if order is valid
 
+        int (*table_bills);
 		// check total bill and creating new shared memory to send total bill to manager
 		if (shared_orders[0][0] == 2)
 		{
@@ -108,7 +109,7 @@ int main()
 				}
 			}
 
-			printf("Bill Amount for Table X: %.2f INR\n", total_bill);
+			printf("Bill Amount for Table is: %.2f INR\n", total_bill);
 			shared_orders[0][3] = total_bill;
 
 			// Creating a shared-memory between Manager-Waiter
@@ -127,7 +128,7 @@ int main()
 				return 1;
 			}
 			printf("table is connected to %d\n", shmid_bills);
-			int (*table_bills);
+			//int (*table_bills);
 			table_bills = shmat(shmid_bills, NULL, 0);
 
 			// Sending Bill Amount to Manager
@@ -138,7 +139,7 @@ int main()
 				*table_bills = (int)total_bill;
 			}
 
-			shmdt(table_bills);
+			//shmdt(table_bills);
 		}
 
         // Check new orders
@@ -148,6 +149,8 @@ int main()
 		shared_orders[0][2] = 0;
 		while (shared_orders[0][2] == 0)
 		{
+            printf("im stuck at 02\n");
+            sleep(2);
 		}
 
 		shouldWeContinue = shared_orders[0][2];
@@ -155,12 +158,22 @@ int main()
         // while (shared_orders[0][4] != 1 &&  shouldWeContinue != -1){
         //     shouldWeContinue = shared_orders[0][2];
         // }
-        while (shared_orders[0][4] != 1){
-
+        while (shared_orders[0][4] != 1){ // while its not ready to take order, also here is where it gets flag to terminate
+            printf("im stuck at 04\n");
+            if(shared_orders[0][5]==1){
+                *table_bills = -2;
+                printf("i sent flag to manager\n");
+                shouldWeContinue = -1;
+                break;
+            }
+            sleep(2);
         }
+        
+        
 		shmdt(shared_orders);
+        shmdt(table_bills);
 
-	} while (shouldWeContinue != -1);
+	} while(shouldWeContinue != -1);
 
 	return 0;
 }
