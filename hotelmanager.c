@@ -14,19 +14,22 @@ typedef struct {
     int earnings;
 } EarningsInfo;
 
-// Function to write earnings to file and print them on console
 void Earnings_to_file(EarningsInfo e) {
     FILE *file = fopen("earnings.txt", "w");
+    
     if (file == NULL) {
-        printf("fopen");
-        exit(EXIT_FAILURE);
+        perror("Error opening file");
+        return;  // Return gracefully instead of using exit
     }
 
+    // Write to file
+    fprintf(file, "Earning from Table %d: %d INR\n", e.table_number, e.earnings);
     
-        fprintf(file, "Earning from Table %d: %d INR\n", e.table_number, e.earnings);
-    
+    // Close the file
+    fclose(file);
 
-    
+    // Print to console
+    printf("Earning from Table %d: %d INR\n", e.table_number, e.earnings);
 }
 
 int main() {
@@ -49,28 +52,14 @@ int main() {
         earnings[i].earnings = 0;
     }
  //shared memory between admin and hotel manager
-    int *terminateHotel;
-    key_t terminationkey;
-    if ((terminationkey = ftok("admin.c", SHM_KEY)) == -1) {
-        printf("Error in ftok\n");
-        return 1;
-    }
-    
-    int shmid = shmget(terminationkey, sizeof(int), IPC_CREAT | 0666);
-    printf("admin shmid is %d\n", shmid);
-    if (shmid == -1) {
-        printf("Error in creating/accessing shared memory\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    terminateHotel = (int *)shmat(shmid, NULL, 0);
+   
     // Create shared memory segment to receive earnings from waiters
      int count=0;
     int waiterID;
 
 	printf("starting for loop\n");
 
-    while( terminateHotel!=0 || count!=num_tables)
+    while(count!=num_tables)
         {for(int i=0; i<num_tables; i++ ){
             waiterID= i+1;
             key_t billkey;
