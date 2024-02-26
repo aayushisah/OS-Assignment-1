@@ -46,12 +46,20 @@ int main() {
     EarningsInfo bills;
     int total_earnings = 0;
 
- //shared memory between admin and hotel manager
+    //shared memory between admin and hotel manager
+    key_t adminKey = ftok("admin.c", 'a');
+    int adminShmId = shmget(adminKey, sizeof(int), IPC_CREAT | 0666);
+    int *terminate = shmat(adminShmId, NULL, 0);
+    if (terminate == (int *)-1) {
+        perror("Error in creating/accessing admin shared memory");
+        exit(1);
+    }
+
    
     // Create shared memory segment to receive earnings from waiters
     int count=num_tables; //active tables
     int waiterID;
-    while(count!=0)
+    while(count!=0 || *terminate==0)
         {for(int i=0; i<num_tables; i++ ){
             waiterID= i+1;
             key_t billkey;
@@ -106,6 +114,7 @@ int main() {
 			shmdt(table_bills);
         }
     }
+    shmdt(terminate);
    
     FILE *file = fopen("earnings.txt", "a");
     if (file == NULL) {
@@ -113,7 +122,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
     // Write total earnings to file
-    fprintf(file, "Total Earnings of Hotel: %d INR\n", total_earnings);
+    fprintf(file, "\nTotal Earnings of Hotel: %d INR\n", total_earnings);
 
     // Assuming total wages is 40% of total earnings
     int total_wages = total_earnings * 0.4;
