@@ -1,1 +1,4 @@
+Total Earnings of Hotel: 0 INR
+Total Wages of Waiters: 0 INR
+Total Profit: 0 INR
 Earning from Table 1: 30 INR

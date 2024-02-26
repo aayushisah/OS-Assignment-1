@@ -76,6 +76,7 @@ int main()
             }
         }
         shared_orders[0][0] = -1;
+        shared_orders[0][4] = 1;
         // Wait for waiter to check order validity
         while (shared_orders[0][0] == -1)
         {
@@ -106,7 +107,8 @@ int main()
 		while(shared_orders[0][3] == -1){
 		}
         printf("Total Bill amount = %d\n", shared_orders[0][3]);
-		
+		shared_orders[0][4] = 0;
+
 		// asking the table do we want more customers, end it if we get -1
         printf("Do you want more customers?");
         scanf("%d", &ShouldWeContinue);

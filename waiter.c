@@ -131,14 +131,17 @@ int main()
 			table_bills = shmat(shmid_bills, NULL, 0);
 
 			// Sending Bill Amount to Manager
-
-			*table_bills = (int)total_bill;
-			printf("waiter thinks he sent %d\n", *table_bills);
-			int amt = *table_bills; // testing
-			printf("manager received bill: %d from waiter %d\n", amt, waiterID);
+			if(numberOfCustomer != 0 && (int)total_bill==0){
+				*table_bills = -1;
+			}
+			else{
+				*table_bills = (int)total_bill;
+			}
 
 			shmdt(table_bills);
 		}
+
+        // Check new orders
 
 		// Terminate process & detach shared-memory
 
@@ -148,6 +151,13 @@ int main()
 		}
 
 		shouldWeContinue = shared_orders[0][2];
+//this fixes waiter
+        // while (shared_orders[0][4] != 1 &&  shouldWeContinue != -1){
+        //     shouldWeContinue = shared_orders[0][2];
+        // }
+        while (shared_orders[0][4] != 1){
+
+        }
 		shmdt(shared_orders);
 
 	} while (shouldWeContinue != -1);

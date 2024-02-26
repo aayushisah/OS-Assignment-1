@@ -15,7 +15,7 @@ typedef struct {
 } EarningsInfo;
 
 void Earnings_to_file(EarningsInfo e) {
-    FILE *file = fopen("earnings.txt", "w");
+    FILE *file = fopen("earnings.txt", "a");
     
     if (file == NULL) {
         perror("Error opening file");
@@ -43,22 +43,14 @@ int main() {
         return 1;
     }
     // Placeholder for actual earnings calculation
-    EarningsInfo earnings[num_tables];
+    EarningsInfo bills;
     int total_earnings = 0;
 
-    // Initialize earnings for each table to 0
-    for (int i = 0; i < num_tables; i++) {
-        earnings[i].table_number = i + 1; // Assuming table numbers start from 1
-        earnings[i].earnings = 0;
-    }
  //shared memory between admin and hotel manager
    
     // Create shared memory segment to receive earnings from waiters
      int count=0;
     int waiterID;
-
-	printf("starting for loop\n");
-
     while(count!=num_tables)
         {for(int i=0; i<num_tables; i++ ){
             waiterID= i+1;
@@ -73,7 +65,6 @@ int main() {
                 printf("Error in creating/accessing shared memory\n");
                 return 1;
             }   
-            printf("hman's table %d is connected to %d\n",i+1, shmid_bills);
             //masterplan
             //run loop for tables 1-X
             //create a mem segment of waiterID (unique)
@@ -85,20 +76,28 @@ int main() {
             // Attach shared memory segment
             int *table_bills;
             table_bills = shmat(shmid_bills, NULL, 0);
-			sleep(1);
-            if(*table_bills==0)  //-1 means no customer at that table rn
+            if(*table_bills==0) 
             {
                 count++;
 				shmdt(table_bills);
                 continue;
              }
-            // Read earnings from waiters and update the earnings for each table
-            if(*table_bills!=0){
-                earnings[i].earnings = *table_bills;
-                total_earnings += earnings[i].earnings;
-                Earnings_to_file(earnings[i]);
-                printf("bill received from table %d = %d\n", i+1,*table_bills);
+			else if(*table_bills==-1){
+				bills.table_number = i+1;
+                bills.earnings = 0;        
+			  	total_earnings += bills.earnings;
                 *table_bills = 0;
+                Earnings_to_file(bills);
+			}
+            // Read earnings from waiters and update the earnings for each table
+			else{
+				bills.table_number = i+1;
+                bills.earnings = *table_bills;
+                total_earnings += bills.earnings;
+                *table_bills = 0;
+                Earnings_to_file(bills);
+				printf("that memlocation is now set to %d\n", *table_bills);
+				sleep(1);
             }
             // Detach shared memory segment
 			shmdt(table_bills);
