@@ -34,30 +34,24 @@ int main()
 			perror("Error in ftok\n");
 			return 1;
 		}
-		else
-		{
-			printf("Generated tablekey..\n");
-		}
-		int shmid = shmget(tablekey, sizeof(int[MAX_ORDER + 1][MAX_ORDER + 1]), IPC_CREAT | 0666); // do we change MAX_ORDER to sizeof(order)?
+		
+		int shmid = shmget(tablekey, sizeof(int[MAX_ORDER + 1][MAX_ORDER + 1]), IPC_CREAT | 0666); 
 		if (shmid == -1)
 		{
 			perror("Error in creating/accessing shared memory\n");
 			return 1;
 		}
-		else
-		{
-			printf("shmid also done. It is = %d\n", shmid);
-		}
+
 
 		// attached to shared memory
 		int(*shared_orders)[MAX_ORDER + 1];
 		shared_orders = shmat(shmid, NULL, 0);
 
 		int numberOfCustomer = shared_orders[0][1];
-		printf("Number of customers = %d\n", numberOfCustomer);
-        while(numberOfCustomer==0){
-            numberOfCustomer = shared_orders[0][1];
-        }
+		
+        	while(numberOfCustomer==0){
+            		numberOfCustomer = shared_orders[0][1];
+        	}
 
 		// code to check if order serial numbers exist
 		while (shared_orders[0][0] == -1)
@@ -89,7 +83,7 @@ int main()
 			}
 			while (shared_orders[0][0] == 0)
 			{
-				printf("Waiting for correction\n");
+				
 				sleep(3);
 			}
 		}
@@ -130,7 +124,7 @@ int main()
 				perror("Error in creating/accessing shared memory\n");
 				return 1;
 			}
-			printf("table is connected to %d\n", shmid_bills);
+		
 			//int (*table_bills);
 			table_bills = shmat(shmid_bills, NULL, 0);
 
@@ -152,20 +146,14 @@ int main()
 		shared_orders[0][2] = 0;
 		while (shared_orders[0][2] == 0)
 		{
-            printf("im stuck at 02\n");
+           
             sleep(2);
 		}
 
 		shouldWeContinue = shared_orders[0][2];
-//this fixes waiter
-        // while (shared_orders[0][4] != 1 &&  shouldWeContinue != -1){
-        //     shouldWeContinue = shared_orders[0][2];
-        // }
         while (shared_orders[0][4] != 1){ // while its not ready to take order, also here is where it gets flag to terminate
-            printf("im stuck at 04\n");
             if(shared_orders[0][5]==1){
                 *table_bills = -2;
-                printf("i sent flag to manager\n");
                 shouldWeContinue = -1;
                 shared_orders[0][1] = 0;
                 break;
