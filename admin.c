@@ -10,7 +10,7 @@
 int main() {
     // Create shared memory segment for termination signal
     key_t adminKey = ftok("admin.c", 'a');
-    int adminShmId = shmget(adminKey, sizeof(int), IPC_CREAT | 0666);
+    int adminShmId = shmget(adminKey, sizeof(int), IPC_CREAT | 0666); //can be made read-only
     int *terminate = shmat(adminShmId, NULL, 0);
     if (terminate == (int *)-1) {
         perror("Error in creating/accessing admin shared memory");

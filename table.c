@@ -24,7 +24,7 @@ int main()
     printf("Enter Table Number:");
     scanf("%d", &tableNumber); // between 1 and 10 inclusive
     int ShouldWeContinue = 0;
-    // the table process requests to know the number of customers
+    
     // shared memory segment
     int tableId = tableNumber;
     key_t tablekey; // key to identify shared memory segment
@@ -51,6 +51,14 @@ int main()
     shared_orders[0][1] = 0;
     shared_orders[0][5] = 0;
 
+        // shared_orders flag assigment :
+        // [0][0] checks order validity.
+        // [0][1] sends the number of customers.
+        // [0][2] shouldWeContinue (are more customers coming or is the table closed for the day.
+        // [0][3] total bill amount.
+        // [0][4] holds the waiter until an order is ready to be calculated.
+        // [0][5] informs the waiter that the table has terminated for the day.
+
     printf("Enter Number of Customers at Table (maximum no. of customers can be 5): ");
     scanf("%d", &numberOfCustomer); // between 1 and 5 inclusive
     
@@ -61,17 +69,17 @@ int main()
 
         // Dynamically allocate memory for orders array
         int **orders = ordersArr(numberOfCustomer);
-        // Copy orders data to shared memory
+        
+
         // shared_orders[0][0] to be empty , it will either show valid order or invalid order, in case of valid order will store the bill
         shared_orders[0][0] = 0;
-       // shared_orders[0][1] = numberOfCustomer; // aditya added, delete if causing trouble.
-      //  printf("%d\n", shared_orders[0][1]);
+
         shared_orders[0][2] = ShouldWeContinue;
         for (int i = 1; i < numberOfCustomer + 1; i++)
         {
             for (int j = 1; j < MAX_ORDER + 1; j++)
             {
-                shared_orders[i][j] = orders[i][j];
+                shared_orders[i][j] = orders[i][j];     //sending orders to the shared memory
             }
         }
         shared_orders[0][0] = -1;
@@ -99,8 +107,7 @@ int main()
             shared_orders[0][0] = -1;
             while (shared_orders[0][0] == -1)
             {
-                
-                //sleep(3);
+                //sleep(3); // waits for the response from the waiter that the bill is ready.
             }
         }
 		while(shared_orders[0][3] == -1){
@@ -108,7 +115,7 @@ int main()
         printf("Total Bill amount is %d INR.\n", shared_orders[0][3]);
 		shared_orders[0][4] = 0; // order ready for waiter = 1
 
-		// asking the table do we want more customers, end it if we get -1
+		// asking the table do we want more customers, end it if we get -1.
         printf("Enter Number of Customers at Table (maximum no. of customers can be 5):");
         scanf("%d", &ShouldWeContinue);
         if(ShouldWeContinue>0){
@@ -121,6 +128,8 @@ int main()
 
     } while (ShouldWeContinue != -1);
     shared_orders[0][5] = 1;
+
+    //detach the shared_memory
     shmdt(shared_orders);
 }
 

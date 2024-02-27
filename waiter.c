@@ -7,7 +7,7 @@
 #include <sys/shm.h>
 
 #define MAX_CUSTOMERS 5 // given in the problem statement maximum number of customers won't exceed 5
-#define MAX_TABLE 5		// table size
+#define MAX_TABLE 10		// table size
 #define READ_END 0
 #define WRITE_END 1
 #define MENU "menu.txt"
@@ -53,6 +53,14 @@ int main()
             		numberOfCustomer = shared_orders[0][1];
         	}
 
+        // shared_orders flag assigment :
+        // [0][0] checks order validity.
+        // [0][1] sends the number of customers.
+        // [0][2] shouldWeContinue (are more customers coming or is the table closed for the day.
+        // [0][3] total bill amount.
+        // [0][4] holds the waiter until an order is ready to be calculated.
+        // [0][5] informs the waiter that the table has terminated for the day.
+
 		// code to check if order serial numbers exist
 		while (shared_orders[0][0] == -1)
 		{
@@ -77,13 +85,12 @@ int main()
 				}
 				if (i == numberOfCustomer)
 				{
-					shared_orders[0][0] = 2;
+					shared_orders[0][0] = 2;  // order is valid
 					shared_orders[0][3] = -1; // to make table.c wait for the bill
 				}
 			}
 			while (shared_orders[0][0] == 0)
 			{
-				
 				//sleep(3);
 			}
 		}
@@ -109,7 +116,7 @@ int main()
 			printf("Bill Amount for Table %d is: %.2f INR\n", waiterID, total_bill);
 			shared_orders[0][3] = total_bill;
 
-			// Creating a shared-memory between Manager-Waiter
+			// Creating a shared-memory between Hotel Manager & Waiter
 
 			key_t billkey;
 			if ((billkey = ftok("waiter.c", waiterID)) == -1)
@@ -125,7 +132,6 @@ int main()
 				return 1;
 			}
 		
-			//int (*table_bills);
 			table_bills = shmat(shmid_bills, NULL, 0);
 
 			// Sending Bill Amount to Manager

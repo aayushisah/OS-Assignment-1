@@ -78,21 +78,20 @@ int main() {
             // Attach shared memory segment
             int *table_bills;
             table_bills = shmat(shmid_bills, NULL, 0);
-            if(*table_bills==0) 
+            if(*table_bills==0)     // no customers seated yet
             {
 				shmdt(table_bills);
                 continue;
              }
-			else if(*table_bills==-1){
+			else if(*table_bills==-1){      // order total = 0
 				bills.table_number = i+1;
                 bills.earnings = 0;        
 			  	total_earnings += bills.earnings;
                 *table_bills = 0;
                 Earnings_to_file(bills);
 			}
-            else if(*table_bills==-2){
+            else if(*table_bills==-2){      // table terminated
                 count--;
-                //printf("table %d closed, %d remain active\n", i+1, count);
                 *table_bills = 0;
             }
             // Read earnings from waiters and update the earnings for each table
