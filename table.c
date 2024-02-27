@@ -41,10 +41,6 @@ int main()
         perror("Error in shmget in creating/ accessing shared memory\n");
         return 1;
     }
-    else
-    {
-        printf("SHM id is = %d\n", shmid);
-    }
     int(*shared_orders)[MAX_ORDER + 1];
     shared_orders = shmat(shmid, NULL, 0); // 2d array to store orders and this is basically passed to the shared segment between waiter and table
     if (shared_orders == (void *)-1)
@@ -101,16 +97,15 @@ int main()
                 }
             }
             shared_orders[0][0] = -1;
-            printf("Check new order\n");
             while (shared_orders[0][0] == -1)
             {
-                printf("table thinks its %d\n", shared_orders[0][0]);
+                
                 sleep(3);
             }
         }
 		while(shared_orders[0][3] == -1){
 		}
-        printf("Total Bill amount = %d\n", shared_orders[0][3]);
+        printf("Total Bill amount = %d INR.\n", shared_orders[0][3]);
 		shared_orders[0][4] = 0; // order ready for waiter = 1
 
 		// asking the table do we want more customers, end it if we get -1
@@ -126,7 +121,6 @@ int main()
 
     } while (ShouldWeContinue != -1);
     shared_orders[0][5] = 1;
-    printf("i have given the order to close\n");
     shmdt(shared_orders);
 }
 
@@ -168,7 +162,7 @@ int **ordersArr(int numberOfCustomer)
             int food_itm = 0;
             while (food_itm != -1)
             {
-                printf("%d", i); /// comment it out for correct output format, debugging purpose
+                
                 printf("Enter the serial number(s) of the item(s) to order from the menu. Enter -1 when done:\n");
                 scanf("%d", &food_itm);
                 write(fd[i][WRITE_END], &food_itm, sizeof(food_itm));
