@@ -112,7 +112,7 @@ int main()
         }
 		while(shared_orders[0][3] == -1){
 		}
-        printf("Total Bill amount is %d INR.\n", shared_orders[0][3]);
+        printf("The total bill amount is %d INR.\n", shared_orders[0][3]);
 		shared_orders[0][4] = 0; // order ready for waiter = 1
 
 		// asking the table do we want more customers, end it if we get -1.
