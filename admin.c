@@ -27,7 +27,7 @@ int main() {
         if (choice != 'Y' && choice != 'N') {
             printf("Invalid choice. Please enter (uppercase) Y or (uppercase) N.\n");
         }
-    } while (choice == 'N');
+    } while (choice != 'Y');
 
     if (choice == 'Y') {
         *terminate = 1;
