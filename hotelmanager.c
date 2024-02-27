@@ -73,12 +73,6 @@ int main() {
                 printf("Error in creating/accessing shared memory\n");
                 return 1;
             }   
-            //masterplan
-            //run loop for tables 1-X
-            //create a mem segment of waiterID (unique)
-            //it has only onw bit, which is 0 (no cust at table) or bill amount (non-zero)
-            //if bill amount; send to earnings.txt, set it to zero, continue to next table
-            //if its zero, continue to next table
             
 
             // Attach shared memory segment
