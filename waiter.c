@@ -66,7 +66,7 @@ int main()
 					}
 					if (shared_orders[i][j] < 1 || shared_orders[i][j] > itemCount)
 					{
-						printf("order invalid. \n");
+						//printf("order invalid. \n");
 						shared_orders[0][0] = 0;
 						break;
 					}
@@ -84,10 +84,10 @@ int main()
 			while (shared_orders[0][0] == 0)
 			{
 				
-				sleep(3);
+				//sleep(3);
 			}
 		}
-		printf("Order valid!\n");
+		//printf("Order valid!\n");
 		shared_orders[0][0] = 2; // returning 2 if order is valid
 
         int (*table_bills);
@@ -106,7 +106,7 @@ int main()
 				}
 			}
 
-			printf("Bill Amount for Table is: %.2f INR\n", total_bill);
+			printf("Bill Amount for Table %d is: %.2f INR\n", waiterID, total_bill);
 			shared_orders[0][3] = total_bill;
 
 			// Creating a shared-memory between Manager-Waiter
@@ -136,18 +136,12 @@ int main()
 				*table_bills = (int)total_bill;
 			}
 
-			//shmdt(table_bills);
 		}
-
-        // Check new orders
-
-		// Terminate process & detach shared-memory
 
 		shared_orders[0][2] = 0;
 		while (shared_orders[0][2] == 0)
 		{
-           
-            sleep(2);
+            //sleep(2);
 		}
 
 		shouldWeContinue = shared_orders[0][2];
@@ -158,7 +152,7 @@ int main()
                 shared_orders[0][1] = 0;
                 break;
             }
-            sleep(2);
+            //sleep(2);
         }
         
         

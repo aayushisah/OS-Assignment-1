@@ -24,9 +24,9 @@ int main() {
     do {
         printf("Do you want to close the hotel? Enter Y for Yes and N for No: ");
         scanf(" %c", &choice);
-    } while (choice == 'N');
+    } while (choice == 'N' || choice == 'n');
 
-    if (choice == 'Y') {
+    if (choice == 'Y' || choice == 'y') {
         *terminate = 1;
     }
 

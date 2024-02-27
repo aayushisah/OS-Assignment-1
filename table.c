@@ -86,7 +86,7 @@ int main()
         {
             shared_orders[0][0] = 0;
             // Order is invalid, prompt customers to give orders again
-            printf("Invalid order detected. Please give orders again.\n");
+            printf("Invalid order detected. Please give your order again.\n\n");
             orders = ordersArr(numberOfCustomer);
             // Copy orders data to shared memory
             for (int i = 1; i < MAX_CUSTOMERS + 1; i++)
@@ -100,12 +100,12 @@ int main()
             while (shared_orders[0][0] == -1)
             {
                 
-                sleep(3);
+                //sleep(3);
             }
         }
 		while(shared_orders[0][3] == -1){
 		}
-        printf("Total Bill amount = %d INR.\n", shared_orders[0][3]);
+        printf("Total Bill amount is %d INR.\n", shared_orders[0][3]);
 		shared_orders[0][4] = 0; // order ready for waiter = 1
 
 		// asking the table do we want more customers, end it if we get -1

@@ -59,7 +59,7 @@ int main() {
     // Create shared memory segment to receive earnings from waiters
     int count=num_tables; //active tables
     int waiterID;
-    while(count!=0 || *terminate==0)
+    while(count>0 || *terminate==0)
         {for(int i=0; i<num_tables; i++ ){
             waiterID= i+1;
             key_t billkey;
@@ -92,7 +92,7 @@ int main() {
 			}
             else if(*table_bills==-2){
                 count--;
-                printf("table %d closed, %d remain active\n", i+1, count);
+                //printf("table %d closed, %d remain active\n", i+1, count);
                 *table_bills = 0;
             }
             // Read earnings from waiters and update the earnings for each table
@@ -102,7 +102,6 @@ int main() {
                 total_earnings += bills.earnings;
                 *table_bills = 0;
                 Earnings_to_file(bills);
-				//printf("that memlocation is now set to %d\n", *table_bills);
             }
             // Detach shared memory segment
 			shmdt(table_bills);
